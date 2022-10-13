@@ -8,6 +8,8 @@ COPY ./Cargo.toml ./Cargo.toml
 
 ADD . ./
 
+ENV DATABASE_URL postgres://dashy:9Y4ZGWkxd9meU2D@dashy.internal:5432/dashy?connect_timeout=2&sslmode=disable
+
 RUN cargo build --release
 
 EXPOSE 8080

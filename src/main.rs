@@ -1,41 +1,75 @@
+mod models;
+
 use actix_web::{
     get, middleware,
     web::{self, Data},
     App, HttpResponse, HttpServer, Responder,
 };
-use std::env;
+use models::{StatPath, StatPayload, Stats};
+use sqlx::{
+    postgres::{PgConnectOptions, PgPoolOptions, PgSslMode},
+    PgPool,
+};
+use std::{env, str::FromStr, time::Duration};
 
-mod postgres;
-mod models;
+#[actix_web::post("/stat/{uid}/{id}")]
+async fn stat_post(
+    pool: web::Data<PgPool>,
+    info: web::Path<StatPath>,
+    payload: web::Json<StatPayload>,
+) -> impl Responder {
+    if payload.number.is_none() && payload.string.is_none() {
+        return HttpResponse::BadRequest().body("Not found");
+    }
 
-async fn stat(db: web::Data<postgres::PostgresPool>) -> impl Responder {
-    let res = web::block(move || {
-        let mut conn = db.get().unwrap();
-        conn.query_opt("SELECT * from stat", &[])
-    })
-    .await;
-
-    let res = match res {
-        Ok(res) => res,
-        Err(_) => return HttpResponse::NotFound().body("Resource Not found"),
-    };
-
-    let row = match res {
-        Ok(res) => res,
-        Err(_) => return HttpResponse::NotFound().body("Resource Not found"),
-    };
-
-    match row {
-        Some(row) => {
-            let val: &str = row.get("val");
-            let id:uuid::Uuid = uuid::Uuid::parse_str(row.get("id")).unwrap();
-            let uid:uuid::Uuid = uuid::Uuid::parse_str(row.get("uid")).unwrap();
-            let stat = models::Stats{ id, uid, val: val.to_string(), updated:1, fetched: 1 };
-            return HttpResponse::Ok().json(stat);
+    let meta = match serde_json::to_value(&payload) {
+        Ok(meta) => meta,
+        Err(_) => {
+            return HttpResponse::BadRequest().body("No valid meta found");
         }
-        None => {}
     };
-    HttpResponse::Ok().body("{}")
+
+    let result = sqlx::query_as!(
+        Stats,
+        r#"UPDATE stats SET meta = $3, updated = NOW() where uid = $1 AND id = $2 RETURNING id, uid, updated, meta"#,
+        info.uid,
+        info.id,
+        meta
+    )
+    .fetch_optional(&**pool)
+    .await;
+    let result: Option<Stats> = match result {
+        Ok(result) => result,
+        Err(_) => return HttpResponse::InternalServerError().body("No results"),
+    };
+
+    let result = match result {
+        Some(result) => result,
+        None => return HttpResponse::NotFound().body("Not found"),
+    };
+    HttpResponse::Ok().json(result)
+}
+
+#[actix_web::get("/stat/{uid}/{id}")]
+async fn stat_get(pool: web::Data<PgPool>, info: web::Path<StatPath>) -> impl Responder {
+    let result = sqlx::query_as!(
+        Stats,
+        r#"UPDATE stats SET fetched = NOW() where uid = $1 AND id = $2 RETURNING id, uid, meta, updated"#,
+        info.uid,
+        info.id
+    )
+    .fetch_optional(&**pool)
+    .await;
+    let result: Option<Stats> = match result {
+        Ok(result) => result,
+        Err(_) => return HttpResponse::InternalServerError().body("No results"),
+    };
+
+    let result = match result {
+        Some(result) => result,
+        None => return HttpResponse::NotFound().body("Not found"),
+    };
+    HttpResponse::Ok().json(result)
 }
 
 #[actix_web::main]
@@ -51,14 +85,26 @@ async fn main() -> std::io::Result<()> {
 
     let binding_interface = format!("0.0.0.0:{}", port);
     println!("Listening at {}", binding_interface);
+    let url = env::var("DATABASE_URL").expect("no DB URL");
+    let options = PgConnectOptions::from_str(&url)
+        .expect("Unable to parse")
+        .ssl_mode(PgSslMode::Allow)
+        .application_name("DASHY");
 
-    let pool = postgres::get_pool();
+    let pool = PgPoolOptions::new()
+        .max_connections(20)
+        .min_connections(1)
+        .acquire_timeout(Duration::from_secs(5))
+        .connect_with(options)
+        .await
+        .expect("Unable to create connection pool");
 
     HttpServer::new(move || {
         App::new()
             .wrap(middleware::DefaultHeaders::new().add(("X-Version", env!("CARGO_PKG_VERSION"))))
             .app_data(Data::new(pool.clone()))
-            .service(web::resource("/stat").route(web::get().to(stat)))
+            .service(stat_post)
+            .service(stat_get)
             .service(ok)
     })
     .bind(binding_interface)?
