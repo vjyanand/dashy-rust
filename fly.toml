@@ -1,6 +1,6 @@
-# fly.toml file generated for iavian-dashy on 2022-09-28T11:48:47+05:30
+# fly.toml file generated for dashy-web on 2022-10-29T19:34:47+05:30
 
-app = "iavian-dashy"
+app = "dashy-web"
 kill_signal = "SIGINT"
 kill_timeout = 5
 processes = []
@@ -21,6 +21,16 @@ processes = []
     soft_limit = 20
     type = "connections"
 
+  [[services.http_checks]]
+    grace_period = "5s"
+    interval = 60000
+    method = "get"
+    path = "/"
+    protocol = "http"
+    restart_limit = 0
+    timeout = 2000
+    tls_skip_verify = false
+
   [[services.ports]]
     force_https = true
     handlers = ["http"]
@@ -35,13 +45,3 @@ processes = []
     interval = "15s"
     restart_limit = 0
     timeout = "2s"
-
-[[services.http_checks]]
-    interval = 60000
-    grace_period = "5s"
-    method = "get"
-    path = "/"
-    protocol = "http"
-    restart_limit = 0
-    timeout = 2000
-    tls_skip_verify = false
