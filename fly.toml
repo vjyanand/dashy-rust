@@ -1,4 +1,4 @@
-# fly.toml file generated for dashy-web on 2022-10-29T19:34:47+05:30
+# fly.toml file generated for dashy-web on 2022-11-01T13:45:26+05:30
 
 app = "dashy-web"
 kill_signal = "SIGINT"

@@ -8,7 +8,11 @@ COPY ./Cargo.toml ./Cargo.toml
 
 ADD . ./
 
-ENV DATABASE_URL postgres://dashy_web:UWS4FC1F6uEpRSX@top2.nearest.of.dashy.internal:5432/dashy_web?sslmode=disable
+ENV DATABASE_URL postgres://dashy_web:hI4lc5mWrme8KXr@top2.nearest.of.dashy-db.internal:5432/dashy_web?sslmode=disable
+
+#postgres://postgres:eEFAQfADEpqlnh4@dashy-db.internal:5432
+
+#DATABASE_URL=postgres://dashy_web:hI4lc5mWrme8KXr@top2.nearest.of.dashy-db.internal:5432/dashy_web
 
 RUN cargo build --release
 
