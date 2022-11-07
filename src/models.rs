@@ -11,6 +11,13 @@ pub struct Stats {
     pub updated: NaiveDateTime,
 }
 
+#[derive(Serialize, Deserialize)]
+pub struct StatsList {
+    pub id: Uuid,
+    pub uid: Uuid,
+    pub updated: NaiveDateTime,
+}
+
 #[derive(Deserialize)]
 pub struct StatPath {
     pub id: Uuid,

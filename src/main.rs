@@ -5,7 +5,7 @@ use actix_web::{
     web::{self, Data},
     App, HttpResponse, HttpServer, Responder,
 };
-use models::{StatPath, StatPayload, Stats, StatsPath};
+use models::{StatPath, StatPayload, Stats, StatsList, StatsPath};
 use sqlx::{
     postgres::{PgConnectOptions, PgPoolOptions, PgSslMode},
     PgPool,
@@ -53,8 +53,8 @@ async fn stat_post(
 #[actix_web::get("/stats/{uid}")]
 async fn stats_get(pool: web::Data<PgPool>, info: web::Path<StatsPath>) -> impl Responder {
     let result = sqlx::query_as!(
-        Stats,
-        r#"SELECT id, uid, meta, updated FROM stats WHERE uid = $1"#,
+        StatsList,
+        r#"SELECT id, uid, updated FROM stats WHERE uid = $1"#,
         info.uid
     )
     .fetch_all(&**pool)
