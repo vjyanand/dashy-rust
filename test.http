@@ -2,3 +2,12 @@ POST https://dashy-web.fly.dev/stat/4b84117b-12a6-4180-b9a5-9b51132822c4/f5f059c
 content-type: application/json
 
 {"number": { "min":44,"max":70,"value":42}}
+
+###
+
+GET https://dashy-web.fly.dev/stats/4b84117b-12a6-4180-b9a5-9b51132822c4 HTTP/1.1
+
+###
+
+GET http://localhost:8080/stats/4b84117b-12a6-4180-b9a5-9b51132822c4 HTTP/1.1
+

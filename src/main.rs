@@ -5,7 +5,7 @@ use actix_web::{
     web::{self, Data},
     App, HttpResponse, HttpServer, Responder,
 };
-use models::{StatPath, StatPayload, Stats};
+use models::{StatPath, StatPayload, Stats, StatsPath};
 use sqlx::{
     postgres::{PgConnectOptions, PgPoolOptions, PgSslMode},
     PgPool,
@@ -46,6 +46,23 @@ async fn stat_post(
     let result = match result {
         Some(result) => result,
         None => return HttpResponse::NotFound().body("Not found"),
+    };
+    HttpResponse::Ok().json(result)
+}
+
+#[actix_web::get("/stats/{uid}")]
+async fn stats_get(pool: web::Data<PgPool>, info: web::Path<StatsPath>) -> impl Responder {
+    let result = sqlx::query_as!(
+        Stats,
+        r#"SELECT id, uid, meta, updated FROM stats WHERE uid = $1"#,
+        info.uid
+    )
+    .fetch_all(&**pool)
+    .await;
+
+    let result = match result {
+        Ok(result) => result,
+        Err(_) => return HttpResponse::NotFound().body("Not found"),
     };
     HttpResponse::Ok().json(result)
 }
@@ -93,7 +110,7 @@ async fn main() -> std::io::Result<()> {
 
     let pool = PgPoolOptions::new()
         .max_connections(20)
-        .min_connections(1)
+        .min_connections(2)
         .acquire_timeout(Duration::from_secs(5))
         .connect_with(options)
         .await
@@ -105,6 +122,7 @@ async fn main() -> std::io::Result<()> {
             .app_data(Data::new(pool.clone()))
             .service(stat_post)
             .service(stat_get)
+            .service(stats_get)
             .service(ok)
     })
     .bind(binding_interface)?

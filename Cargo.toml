@@ -14,3 +14,6 @@ serde = { version = "1.0.147", features = ["derive"] }
 serde_json = "1.0.87"
 sqlx = { version = "0.6.2", features = ["all", "json", "chrono", "uuid", "time", "runtime-tokio-rustls"] }
 uuid = { version = "1.2.1", features = ["v4", "fast-rng", "serde"] }
+
+[profile.dev.package.sqlx-macros]
+opt-level = 3

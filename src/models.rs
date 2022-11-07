@@ -17,6 +17,11 @@ pub struct StatPath {
     pub uid: Uuid,
 }
 
+#[derive(Deserialize)]
+pub struct StatsPath {
+    pub uid: Uuid,
+}
+
 #[derive(Serialize, Deserialize)]
 pub struct StatPayload {
     pub number: Option<StatPayloadNumber>,
