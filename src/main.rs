@@ -52,40 +52,37 @@ async fn stat_post(
 
 #[actix_web::get("/stats/{uid}")]
 async fn stats_get(pool: web::Data<PgPool>, info: web::Path<StatsPath>) -> impl Responder {
-    let result = sqlx::query_as!(
+    if let Ok(result) = sqlx::query_as!(
         StatsList,
         r#"SELECT id, uid, updated FROM stats WHERE uid = $1"#,
         info.uid
     )
     .fetch_all(&**pool)
-    .await;
-
-    let result = match result {
-        Ok(result) => result,
-        Err(_) => return HttpResponse::NotFound().body("Not found"),
+    .await
+    {
+        return HttpResponse::Ok().json(result);
+    } else {
+        return HttpResponse::NotFound().body("Not found");
     };
-    HttpResponse::Ok().json(result)
 }
 
 #[actix_web::get("/stat/{uid}/{id}")]
 async fn stat_get(pool: web::Data<PgPool>, info: web::Path<StatPath>) -> impl Responder {
-    let result = sqlx::query_as!(
+    let Ok(result) = sqlx::query_as!(
         Stats,
         r#"UPDATE stats SET fetched = NOW() where uid = $1 AND id = $2 RETURNING id, uid, meta, updated"#,
         info.uid,
         info.id
     )
     .fetch_optional(&**pool)
-    .await;
-    let result: Option<Stats> = match result {
-        Ok(result) => result,
-        Err(_) => return HttpResponse::InternalServerError().body("No results"),
+    .await else {
+        return HttpResponse::InternalServerError().body("No results")
     };
 
-    let result = match result {
-        Some(result) => result,
-        None => return HttpResponse::NotFound().body("Not found"),
+    let Some(result) = result else {
+        return HttpResponse::NotFound().body("Not found")
     };
+
     HttpResponse::Ok().json(result)
 }
 
