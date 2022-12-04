@@ -6,13 +6,13 @@ rust-version = "1.65"
 
 [dependencies]
 actix-web = "4.2.1"
-chrono = { version = "0.4.22", features = ["serde"] }
+chrono = { version = "0.4.23", features = ["serde"] }
 env_logger = "0.9.1"
 log = "0.4.17"
-serde = { version = "1.0.147", features = ["derive"] }
-serde_json = "1.0.87"
+serde = { version = "1.0.148", features = ["derive"] }
+serde_json = "1.0.89"
 sqlx = { version = "0.6.2", features = ["all", "json", "chrono", "uuid", "time", "runtime-tokio-rustls"] }
-uuid = { version = "1.2.1", features = ["v4", "fast-rng", "serde"] }
+uuid = { version = "1.2.2", features = ["v4", "fast-rng", "serde"] }
 
 [profile.dev.package.sqlx-macros]
 opt-level = 3
