@@ -1,6 +1,6 @@
-# fly.toml file generated for dashy-web on 2022-11-01T13:45:26+05:30
+# fly.toml file generated for dashy-api on 2022-12-04T16:06:53+05:30
 
-app = "dashy-web"
+app = "dashy-api"
 kill_signal = "SIGINT"
 kill_timeout = 5
 processes = []
