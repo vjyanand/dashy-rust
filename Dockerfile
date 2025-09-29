@@ -4,15 +4,17 @@ RUN apk add --update --no-cache --repository http://dl-3.alpinelinux.org/alpine/
 
 WORKDIR /opt/dashy
 
-COPY ./Cargo.toml ./Cargo.toml
+COPY ./Cargo.toml ./
+
+# Dummy src for deps
+RUN mkdir src && echo "fn main() {}" > src/main.rs
+
+# Build deps with target (caches musl artifacts)
+RUN cargo build --release && rm -rf src
 
 ADD . ./
 
-ENV DATABASE_URL=postgres://dashy_api:K9xtuYfIQWXFgeq@top2.nearest.of.dashy-api-db.internal:5432/dashy_api?sslmode=disable
-
-#postgres://postgres:eEFAQfADEpqlnh4@dashy-db.internal:5432
-
-#DATABASE_URL=postgres://dashy_web:hI4lc5mWrme8KXr@top2.nearest.of.dashy-db.internal:5432/dashy_web
+RUN touch src/main.rs
 
 RUN cargo build --release
 
