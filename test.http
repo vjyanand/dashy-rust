@@ -1,4 +1,5 @@
 @host=http://localhost:8080
+@host=https://dashy-api.fly.dev
 POST {{host}}/stat/4b84117b-12a6-4180-b9a5-9b51132822c4/f5f059c7-f578-40ed-a693-84c60559fe50 HTTP/1.1
 content-type: application/json
 

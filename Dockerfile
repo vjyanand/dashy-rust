@@ -14,12 +14,10 @@ RUN cargo build --release && rm -rf src
 
 ADD . ./
 
-RUN touch src/main.rs
-
-RUN cargo build --release
-
-ENV DATABASE_URL='postgresql://neondb_owner:npg_VtZWh36FuBzN@ep-damp-scene-ad3mamku-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require'
+RUN touch src/main.rs && cargo build --release
 
 EXPOSE 8080
+
+ENV DATABASE_URL='postgresql://neondb_owner:npg_VtZWh36FuBzN@ep-damp-scene-ad3mamku-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require'
 
 CMD ["./target/release/dashy"]
