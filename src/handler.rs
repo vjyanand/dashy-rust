@@ -25,7 +25,7 @@ pub async fn stat_post(
     };
 
     let result = sqlx::query_as(
-        r#"UPDATE stats SET meta = $3, updated = NOW() where uid = $1 AND id = $2 RETURNING id, uid, updated, meta"#
+        r#"UPDATE stats SET meta = $3, updated = NOW() where uid = $1 AND id = $2 RETURNING id, uid, updated, meta, name"#
     )
     .bind(info.uid)
     .bind(info.id)
@@ -47,7 +47,7 @@ pub async fn stat_post(
 pub async fn stats_get(pool: web::Data<PgPool>, info: web::Path<StatsPath>) -> impl Responder {
     log::warn!("Getting stats for uid {}", info.uid);
     let result: Result<Vec<Stats>, sqlx::Error> =
-        sqlx::query_as(r#"SELECT id, uid, updated, null as meta FROM stats WHERE uid = $1"#)
+        sqlx::query_as(r#"SELECT id, uid, updated, null as meta, name FROM stats WHERE uid = $1"#)
             .bind(info.uid)
             .fetch_all(&**pool)
             .await;
@@ -64,7 +64,7 @@ pub async fn stats_get(pool: web::Data<PgPool>, info: web::Path<StatsPath>) -> i
 #[actix_web::get("/stat/{uid}/{id}")]
 pub async fn stat_get(pool: web::Data<PgPool>, info: web::Path<StatPath>) -> impl Responder {
     let result: Result<Option<Stats>, sqlx::Error> = sqlx::query_as(
-        r#"UPDATE stats SET fetched = NOW() where uid = $1 AND id = $2 RETURNING id, uid, meta, updated"#
+        r#"UPDATE stats SET fetched = NOW() where uid = $1 AND id = $2 RETURNING id, uid, meta, name, updated"#
     ).bind(info.uid)
     .bind(info.id)
     .fetch_optional(&**pool)

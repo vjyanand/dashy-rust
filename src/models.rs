@@ -7,6 +7,7 @@ use uuid::Uuid;
 pub struct Stats {
     pub id: Uuid,
     pub uid: Uuid,
+    pub name: String,
     pub meta: Option<Value>,
     pub updated: NaiveDateTime,
 }
