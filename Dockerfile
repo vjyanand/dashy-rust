@@ -18,6 +18,8 @@ RUN touch src/main.rs
 
 RUN cargo build --release
 
+ENV DATABASE_URL='postgresql://neondb_owner:npg_VtZWh36FuBzN@ep-damp-scene-ad3mamku-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require'
+
 EXPOSE 8080
 
 CMD ["./target/release/dashy"]

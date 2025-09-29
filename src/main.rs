@@ -10,8 +10,6 @@ use crate::handler::{ok, stat_get, stat_post, stats_get};
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     env_logger::init();
-    env::set_var("DATABASE_URL", "postgresql://neondb_owner:npg_ndau8Kjh5wxE@ep-damp-scene-ad3mamku-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require");
-
     let port: u16 = env::var("PORT")
         .unwrap_or_else(|_| String::from("8080"))
         .parse()
