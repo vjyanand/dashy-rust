@@ -6,7 +6,7 @@ use env_logger::{Builder, Env};
 use sqlx::postgres::{PgConnectOptions, PgPoolOptions, PgSslMode};
 use std::{env, str::FromStr, time::Duration};
 
-use crate::handler::{ok, stat_get, stat_post, stats_get};
+use crate::handler::{apns_register, ok, stat_get, stat_post, stats_get};
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -44,6 +44,7 @@ async fn main() -> std::io::Result<()> {
             .service(stat_post)
             .service(stat_get)
             .service(stats_get)
+            .service(apns_register)
             .service(ok)
     })
     .bind(binding_interface)?

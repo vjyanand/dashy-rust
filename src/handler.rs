@@ -3,9 +3,16 @@ use actix_web::{
     HttpResponse, Responder,
 };
 
+use serde_json::Value;
 use sqlx::PgPool;
 
 use crate::models::{StatPath, StatPayload, Stats, StatsPath};
+
+#[actix_web::post("/ios/widget/apns/register")]
+pub async fn apns_register(payload: web::Json<Value>) -> impl Responder {
+    log::info!("Received payload: {:?}", payload.0);
+    HttpResponse::Ok().json(payload.0)
+}
 
 #[actix_web::post("/stat/{uid}/{id}")]
 pub async fn stat_post(
