@@ -2,6 +2,7 @@ mod handler;
 mod models;
 
 use actix_web::{middleware, web::Data, App, HttpServer};
+use env_logger::{Builder, Env};
 use sqlx::postgres::{PgConnectOptions, PgPoolOptions, PgSslMode};
 use std::{env, str::FromStr, time::Duration};
 
@@ -9,7 +10,11 @@ use crate::handler::{ok, stat_get, stat_post, stats_get};
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    env_logger::init();
+    Builder::from_env(Env::default())
+        .format_timestamp(None) // Optional: remove timestamp
+        .write_style(env_logger::WriteStyle::Always) // Force colors
+        .init();
+    
     let port: u16 = env::var("PORT")
         .unwrap_or_else(|_| String::from("8080"))
         .parse()
@@ -34,6 +39,7 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
         App::new()
             .wrap(middleware::DefaultHeaders::new().add(("X-Version", env!("CARGO_PKG_VERSION"))))
+            .wrap(middleware::Logger::default())
             .app_data(Data::new(pool.clone()))
             .service(stat_post)
             .service(stat_get)
