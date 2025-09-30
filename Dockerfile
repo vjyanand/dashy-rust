@@ -20,4 +20,6 @@ EXPOSE 8080
 
 ENV DATABASE_URL='postgresql://neondb_owner:npg_VtZWh36FuBzN@ep-damp-scene-ad3mamku-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require'
 
+ENV RUST_LOG='info'
+
 CMD ["./target/release/dashy"]
