@@ -6,6 +6,12 @@ content-type: application/json
 {"number": { "min":44,"max":70,"value":42}}
 
 ###
+POST {{host}}/ios/widget/apns/register HTTP/1.1
+content-type: application/json
+
+{"token":"4094d977d02c2551c30e2a1b7987caf1df8cc012ba4ce122a5cbf4422f7189fd74f0b3dc84b786f5222f6f2166a04acce56d744e7bc254fbd28ac508ab393dc6cebea5e4e628db2892c01121bce2e383", "widgets": [ {"dashyId": "😃", "family": "systemMedium", "kind":"widget"}]}
+
+###
 GET {{host}}/stats/4b84117b-12a6-4180-b9a5-9b51132822c4 HTTP/1.1
 
 ###
