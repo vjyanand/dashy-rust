@@ -3,9 +3,10 @@ use actix_web::{
     HttpResponse, Responder,
 };
 
-use log::{info, warn};
+use log::info;
 use serde_json::Value;
 use sqlx::PgPool;
+use uuid::Uuid;
 
 use crate::models::{StatPath, StatPayload, Stats, StatsPath};
 
@@ -15,8 +16,13 @@ pub async fn apns_register(pool: web::Data<PgPool>, payload: web::Json<Value>) -
     let token = payload.get("token").and_then(|token| token.as_str());
     if let Some(widgets) = payload.get("widgets").and_then(|v| v.as_array()) {
         for widget_obj in widgets {
-            let dashy_id = widget_obj.get("dashyId").and_then(|v| v.as_str());
-            info!("Registering APNS token: {:?} for widget: {:?}", token, dashy_id);
+            let dashy_id: Option<Uuid> = widget_obj
+                .get("dashyId")
+                .and_then(|v| serde_json::from_value(v.clone()).ok());
+            info!(
+                "Registering APNS token: {:?} for widget: {:?}",
+                token, dashy_id
+            );
             let result =
                 sqlx::query(r#"INSERT INTO public.apns (id, token, wid) VALUES ($1, $2, $3)"#)
                     .bind(id)
