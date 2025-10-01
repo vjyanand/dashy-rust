@@ -9,7 +9,22 @@ use sqlx::PgPool;
 use crate::models::{StatPath, StatPayload, Stats, StatsPath};
 
 #[actix_web::post("/ios/widget/apns/register")]
-pub async fn apns_register(payload: web::Json<Value>) -> impl Responder {
+pub async fn apns_register(pool: web::Data<PgPool>, payload: web::Json<Value>) -> impl Responder {
+    let id = uuid::Uuid::new_v4();
+    let token = payload.get("token").and_then(|token| token.as_str());
+    let widget = payload.get("widget").and_then(|widget| widget.as_str());
+
+    let result = sqlx::query(
+        r#"INSERT INTO public.apns (id, token, wid) VALUES ($1, $2, $3)"#
+    ).bind(id).bind(token).bind(widget).execute(&**pool).await;
+    
+    match result {
+        Ok(_) => log::info!("Registered APNS token: {}", token.unwrap_or("none")),
+        Err(e) => {
+            log::error!("Error registering APNS token: {}", e);
+            return HttpResponse::InternalServerError().body("Error registering APNS token");
+        }
+    }
     log::info!("Received payload: {:?}", payload.0);
     HttpResponse::Ok().json(payload.0)
 }
@@ -60,7 +75,7 @@ pub async fn stats_get(pool: web::Data<PgPool>, info: web::Path<StatsPath>) -> i
             .await;
     if let Err(e) = &result {
         log::error!("Error getting stats for uid {}: {}", info.uid, e);
-    }    
+    }
     if let Ok(result) = result {
         HttpResponse::Ok().json(result)
     } else {

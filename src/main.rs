@@ -14,7 +14,7 @@ async fn main() -> std::io::Result<()> {
         .format_timestamp(None) // Optional: remove timestamp
         .write_style(env_logger::WriteStyle::Always) // Force colors
         .init();
-    
+
     let port: u16 = env::var("PORT")
         .unwrap_or_else(|_| String::from("8080"))
         .parse()
